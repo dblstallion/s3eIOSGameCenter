@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2001-2011 Ideaworks3D Ltd.
- * All Rights Reserved.
+ * (C) 2001-2012 Marmalade. All Rights Reserved.
  *
  * This document is protected by copyright, and contains information
- * proprietary to Ideaworks Labs.
- * This file consists of source code released by Ideaworks Labs under
+ * proprietary to Marmalade.
+ *
+ * This file consists of source code released by Marmalade under
  * the terms of the accompanying End User License Agreement (EULA).
  * Please do not use this program/source code before you have read the
  * EULA and have agreed to be bound by its terms.
@@ -1121,7 +1121,7 @@ typedef enum s3eIOSGameCenterVoiceChatState
 typedef struct s3eIOSGameCenterVoiceChatPlayerState
 {
     /** ID of player whose state has changed */
-    char                            m_PlayerID[S3E_IOSGAMECENTER_STRING_MAX];
+    char m_PlayerID[S3E_IOSGAMECENTER_STRING_MAX];
 
     /** New state of the given player */
     s3eIOSGameCenterVoiceChatState     m_State;
@@ -1210,12 +1210,18 @@ const char* s3eIOSGameCenterGetString(s3eIOSGameCenterProperty property);
 /**
  * Authenticate the local player.
  *
+ * @param authenticationCB  Callback function to be called after Game Center 
+ *                          tries to authenticate local player
+ * @param userData          Currently unused - set it to NULL
+ * @param reuse             Flag to indicate callback can be reused for 
+ *                          mid-game authentications of local player
+ *
  * This must be called and the player must be authenticated in order to
  * use any other game center functions.
  * @par Required Header Files
  * s3eIOSGameCenter.h
  */
-s3eResult s3eIOSGameCenterAuthenticate(s3eIOSGameCenterAuthenticationCallbackFn authenticationCB, void* userData);
+s3eResult s3eIOSGameCenterAuthenticate(s3eIOSGameCenterAuthenticationCallbackFn authenticationCB, void* userData, s3eBool reuse S3E_DEFAULT(0));
 
 /**
  * Load a list of friends for the local player asynchronously.
@@ -1288,7 +1294,7 @@ s3eResult s3eIOSGameCenterMatchmakerFindPlayersForHostedRequest(s3eIOSGameCenter
  * and the user selects players to create the match with.
  *
  * @param request       Specifies the initial matchmaking requirements.
- * @param callbacks     Structure difining a set of callbacks to be called for
+ * @param callbacks     Structure defining a set of callbacks to be called for
  *                      events once the match has started.
  * @ return
  * - @ref S3E_RESULT_SUCCESS if a match is successfully started.
@@ -1345,7 +1351,7 @@ s3eResult s3eIOSGameCenterMatchmakerHostedGUI(s3eIOSGameCenterMatchRequest* requ
  *
  * @param request       Specifies the matchmaking requirements.
  * @param createMatchCB Function called when match creation has completed.
- * @param callbacks     Structure difining a set of callbacks to be called for
+ * @param callbacks     Structure defining a set of callbacks to be called for
  *                      events once the match has started.
  * @return
  * - @ref S3E_TRUE   if the GUI is displayed, the user accepts the invitation.
@@ -1383,7 +1389,7 @@ s3eResult s3eIOSGameCenterReleaseInvite(void* inviteID);
  *
  * @param request       Specifies the matchmaking requirements.
  * @param createMatchCB Function called when match creation has completed.
- * @param callbacks     Structure difining a set of callbacks to be called for
+ * @param callbacks     Structure defining a set of callbacks to be called for
  *                      events once the match has started.
  * @return
  * - @ref S3E_RESULT_SUCCESS if no error occurred.
@@ -1876,5 +1882,4 @@ s3eBool s3eExtIOSGameCenterAvailable();
 S3E_END_C_DECL
 
 /** @} */
-
 #endif /* !S3E_EXT_IOSGAMECENTER_H */

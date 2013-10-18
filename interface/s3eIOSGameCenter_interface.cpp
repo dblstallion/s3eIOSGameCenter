@@ -5,8 +5,17 @@
 
 #include "s3eExt.h"
 #include "IwDebug.h"
+#include "s3eDevice.h"
+
 
 #include "s3eIOSGameCenter.h"
+
+
+// For MIPs (and WP8) platform we do not have asm code for stack switching 
+// implemented. So we make LoaderCallStart call manually to set GlobalLock
+#if defined __mips || defined S3E_ANDROID_X86 || (defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP))
+#define LOADER_CALL
+#endif
 
 /**
  * Definitions for functions types passed to/from s3eExt interface
@@ -15,7 +24,7 @@ typedef const char*(*s3eIOSGameCenterGetErrorString_t)();
 typedef s3eIOSGameCenterError(*s3eIOSGameCenterGetError_t)();
 typedef      int32(*s3eIOSGameCenterGetInt_t)(s3eIOSGameCenterProperty property);
 typedef const char*(*s3eIOSGameCenterGetString_t)(s3eIOSGameCenterProperty property);
-typedef  s3eResult(*s3eIOSGameCenterAuthenticate_t)(s3eIOSGameCenterAuthenticationCallbackFn authenticationCB, void* userData);
+typedef  s3eResult(*s3eIOSGameCenterAuthenticate_t)(s3eIOSGameCenterAuthenticationCallbackFn authenticationCB, void* userData, s3eBool reuse);
 typedef  s3eResult(*s3eIOSGameCenterLoadFriends_t)(s3eIOSGameCenterLoadFriendsCallbackFn loadFriendsCB, void* userData);
 typedef      int32(*s3eIOSGameCenterGetFriendIDs_t)(char** friendIDs, int maxFriendIDs);
 typedef  s3eResult(*s3eIOSGameCenterQueryPlayersActivity_t)(s3eIOSGameCenterActivityCallbackFn queryActivityCB, int playerGroup, void* userData);
@@ -128,7 +137,8 @@ static bool _extLoad()
         if (res == S3E_RESULT_SUCCESS)
             g_GotExt = true;
         else
-            s3eDebugAssertShow(S3E_MESSAGE_CONTINUE_STOP_IGNORE, "error loading extension: s3eIOSGameCenter");
+            s3eDebugAssertShow(S3E_MESSAGE_CONTINUE_STOP_IGNORE,                 "error loading extension: s3eIOSGameCenter");
+            
         g_TriedExt = true;
         g_TriedNoMsgExt = true;
     }
@@ -169,7 +179,17 @@ const char* s3eIOSGameCenterGetErrorString()
     if (!_extLoad())
         return NULL;
 
-    return g_Ext.m_s3eIOSGameCenterGetErrorString();
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    const char* ret = g_Ext.m_s3eIOSGameCenterGetErrorString();
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eIOSGameCenterError s3eIOSGameCenterGetError()
@@ -179,7 +199,17 @@ s3eIOSGameCenterError s3eIOSGameCenterGetError()
     if (!_extLoad())
         return (s3eIOSGameCenterError)0;
 
-    return g_Ext.m_s3eIOSGameCenterGetError();
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eIOSGameCenterError ret = g_Ext.m_s3eIOSGameCenterGetError();
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 int32 s3eIOSGameCenterGetInt(s3eIOSGameCenterProperty property)
@@ -189,7 +219,17 @@ int32 s3eIOSGameCenterGetInt(s3eIOSGameCenterProperty property)
     if (!_extLoad())
         return -1;
 
-    return g_Ext.m_s3eIOSGameCenterGetInt(property);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    int32 ret = g_Ext.m_s3eIOSGameCenterGetInt(property);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 const char* s3eIOSGameCenterGetString(s3eIOSGameCenterProperty property)
@@ -199,17 +239,37 @@ const char* s3eIOSGameCenterGetString(s3eIOSGameCenterProperty property)
     if (!_extLoad())
         return "";
 
-    return g_Ext.m_s3eIOSGameCenterGetString(property);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    const char* ret = g_Ext.m_s3eIOSGameCenterGetString(property);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
-s3eResult s3eIOSGameCenterAuthenticate(s3eIOSGameCenterAuthenticationCallbackFn authenticationCB, void* userData)
+s3eResult s3eIOSGameCenterAuthenticate(s3eIOSGameCenterAuthenticationCallbackFn authenticationCB, void* userData, s3eBool reuse)
 {
     IwTrace(IOSGAMECENTER_VERBOSE, ("calling s3eIOSGameCenter[4] func: s3eIOSGameCenterAuthenticate"));
 
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterAuthenticate(authenticationCB, userData);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterAuthenticate(authenticationCB, userData, reuse);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLoadFriends(s3eIOSGameCenterLoadFriendsCallbackFn loadFriendsCB, void* userData)
@@ -219,7 +279,17 @@ s3eResult s3eIOSGameCenterLoadFriends(s3eIOSGameCenterLoadFriendsCallbackFn load
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLoadFriends(loadFriendsCB, userData);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLoadFriends(loadFriendsCB, userData);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 int32 s3eIOSGameCenterGetFriendIDs(char** friendIDs, int maxFriendIDs)
@@ -229,7 +299,17 @@ int32 s3eIOSGameCenterGetFriendIDs(char** friendIDs, int maxFriendIDs)
     if (!_extLoad())
         return -1;
 
-    return g_Ext.m_s3eIOSGameCenterGetFriendIDs(friendIDs, maxFriendIDs);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    int32 ret = g_Ext.m_s3eIOSGameCenterGetFriendIDs(friendIDs, maxFriendIDs);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterQueryPlayersActivity(s3eIOSGameCenterActivityCallbackFn queryActivityCB, int playerGroup, void* userData)
@@ -239,7 +319,17 @@ s3eResult s3eIOSGameCenterQueryPlayersActivity(s3eIOSGameCenterActivityCallbackF
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterQueryPlayersActivity(queryActivityCB, playerGroup, userData);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterQueryPlayersActivity(queryActivityCB, playerGroup, userData);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterSetInviteHandler(s3eIOSGameCenterInviteCallbackFn callback)
@@ -249,7 +339,17 @@ s3eResult s3eIOSGameCenterSetInviteHandler(s3eIOSGameCenterInviteCallbackFn call
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterSetInviteHandler(callback);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterSetInviteHandler(callback);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterMatchmakerFindPlayersForHostedRequest(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterFindPlayersCallbackFn findPlayersCB, void* userData)
@@ -259,7 +359,17 @@ s3eResult s3eIOSGameCenterMatchmakerFindPlayersForHostedRequest(s3eIOSGameCenter
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterMatchmakerFindPlayersForHostedRequest(request, findPlayersCB, userData);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterMatchmakerFindPlayersForHostedRequest(request, findPlayersCB, userData);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterMatchmakerGUI(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterMatchCallbacks* callbacks)
@@ -269,7 +379,17 @@ s3eResult s3eIOSGameCenterMatchmakerGUI(s3eIOSGameCenterMatchRequest* request, s
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterMatchmakerGUI(request, callbacks);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterMatchmakerGUI(request, callbacks);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterMatchmakerHostedGUI(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterFindPlayersCallbackFn findPlayersCB)
@@ -279,7 +399,17 @@ s3eResult s3eIOSGameCenterMatchmakerHostedGUI(s3eIOSGameCenterMatchRequest* requ
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterMatchmakerHostedGUI(request, findPlayersCB);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterMatchmakerHostedGUI(request, findPlayersCB);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eBool s3eIOSGameCenterInviteAcceptGUI(void* inviteID, s3eIOSGameCenterMatchCallbacks* callbacks)
@@ -289,7 +419,17 @@ s3eBool s3eIOSGameCenterInviteAcceptGUI(void* inviteID, s3eIOSGameCenterMatchCal
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterInviteAcceptGUI(inviteID, callbacks);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eBool ret = g_Ext.m_s3eIOSGameCenterInviteAcceptGUI(inviteID, callbacks);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterReleaseInvite(void* inviteID)
@@ -299,7 +439,17 @@ s3eResult s3eIOSGameCenterReleaseInvite(void* inviteID)
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterReleaseInvite(inviteID);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterReleaseInvite(inviteID);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterMatchmakerCreateMatch(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterCreateMatchCallbackFn createMatchCB, s3eIOSGameCenterMatchCallbacks* callbacks)
@@ -309,7 +459,17 @@ s3eResult s3eIOSGameCenterMatchmakerCreateMatch(s3eIOSGameCenterMatchRequest* re
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterMatchmakerCreateMatch(request, createMatchCB, callbacks);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterMatchmakerCreateMatch(request, createMatchCB, callbacks);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterMatchmakerAddPlayersToMatch(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterAddPlayersToMatchCallbackFn addPlayersCB, void* userData)
@@ -319,7 +479,17 @@ s3eResult s3eIOSGameCenterMatchmakerAddPlayersToMatch(s3eIOSGameCenterMatchReque
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterMatchmakerAddPlayersToMatch(request, addPlayersCB, userData);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterMatchmakerAddPlayersToMatch(request, addPlayersCB, userData);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 void s3eIOSGameCenterCancelMatchmaking()
@@ -329,7 +499,17 @@ void s3eIOSGameCenterCancelMatchmaking()
     if (!_extLoad())
         return;
 
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
     g_Ext.m_s3eIOSGameCenterCancelMatchmaking();
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return;
 }
 
 s3eResult s3eIOSGameCenterMatchDisconnect()
@@ -339,7 +519,17 @@ s3eResult s3eIOSGameCenterMatchDisconnect()
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterMatchDisconnect();
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterMatchDisconnect();
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 int32 s3eIOSGameCenterMatchGetInt(s3eIOSGameCenterMatchProperty property)
@@ -349,7 +539,17 @@ int32 s3eIOSGameCenterMatchGetInt(s3eIOSGameCenterMatchProperty property)
     if (!_extLoad())
         return -1;
 
-    return g_Ext.m_s3eIOSGameCenterMatchGetInt(property);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    int32 ret = g_Ext.m_s3eIOSGameCenterMatchGetInt(property);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 const char* s3eIOSGameCenterPlayerGetString(s3eIOSGameCenterPlayer* player, s3eIOSGameCenterPlayerProperty property)
@@ -359,7 +559,17 @@ const char* s3eIOSGameCenterPlayerGetString(s3eIOSGameCenterPlayer* player, s3eI
     if (!_extLoad())
         return "";
 
-    return g_Ext.m_s3eIOSGameCenterPlayerGetString(player, property);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    const char* ret = g_Ext.m_s3eIOSGameCenterPlayerGetString(player, property);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 int32 s3eIOSGameCenterPlayerGetInt(s3eIOSGameCenterPlayer* player, s3eIOSGameCenterPlayerProperty property)
@@ -369,7 +579,17 @@ int32 s3eIOSGameCenterPlayerGetInt(s3eIOSGameCenterPlayer* player, s3eIOSGameCen
     if (!_extLoad())
         return -1;
 
-    return g_Ext.m_s3eIOSGameCenterPlayerGetInt(player, property);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    int32 ret = g_Ext.m_s3eIOSGameCenterPlayerGetInt(player, property);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 int32 s3eIOSGameCenterGetPlayerIDsInMatch(char** playerIDs, int maxPlayerIDs)
@@ -379,7 +599,17 @@ int32 s3eIOSGameCenterGetPlayerIDsInMatch(char** playerIDs, int maxPlayerIDs)
     if (!_extLoad())
         return -1;
 
-    return g_Ext.m_s3eIOSGameCenterGetPlayerIDsInMatch(playerIDs, maxPlayerIDs);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    int32 ret = g_Ext.m_s3eIOSGameCenterGetPlayerIDsInMatch(playerIDs, maxPlayerIDs);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterGetPlayers(const char** playerIDs, int numPlayers, s3eIOSGameCenterGetPlayersCallbackFn callback)
@@ -389,7 +619,17 @@ s3eResult s3eIOSGameCenterGetPlayers(const char** playerIDs, int numPlayers, s3e
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterGetPlayers(playerIDs, numPlayers, callback);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterGetPlayers(playerIDs, numPlayers, callback);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 void s3eIOSGameCenterReleasePlayers(s3eIOSGameCenterPlayer** players, int numPlayers)
@@ -399,7 +639,17 @@ void s3eIOSGameCenterReleasePlayers(s3eIOSGameCenterPlayer** players, int numPla
     if (!_extLoad())
         return;
 
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
     g_Ext.m_s3eIOSGameCenterReleasePlayers(players, numPlayers);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return;
 }
 
 s3eResult s3eIOSGameCenterSendDataToPlayers(char** playerIDs, int numPlayers, const void* data, int dataLen, s3eIOSGameCenterMatchSendDataMode mode)
@@ -409,7 +659,17 @@ s3eResult s3eIOSGameCenterSendDataToPlayers(char** playerIDs, int numPlayers, co
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterSendDataToPlayers(playerIDs, numPlayers, data, dataLen, mode);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterSendDataToPlayers(playerIDs, numPlayers, data, dataLen, mode);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterSendDataToAllPlayers(const void* data, int dataLen, s3eIOSGameCenterMatchSendDataMode mode)
@@ -419,7 +679,17 @@ s3eResult s3eIOSGameCenterSendDataToAllPlayers(const void* data, int dataLen, s3
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterSendDataToAllPlayers(data, dataLen, mode);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterSendDataToAllPlayers(data, dataLen, mode);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLeaderboardLoadCategories(s3eIOSGameCenterLeaderboardLoadCategoriesCallbackFn loadCategoriesCB)
@@ -429,7 +699,17 @@ s3eResult s3eIOSGameCenterLeaderboardLoadCategories(s3eIOSGameCenterLeaderboardL
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLeaderboardLoadCategories(loadCategoriesCB);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLeaderboardLoadCategories(loadCategoriesCB);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLeaderboardShowGUI(const char* category, s3eIOSGameCenterTimeScope timeScope)
@@ -439,7 +719,17 @@ s3eResult s3eIOSGameCenterLeaderboardShowGUI(const char* category, s3eIOSGameCen
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLeaderboardShowGUI(category, timeScope);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLeaderboardShowGUI(category, timeScope);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eIOSGameCenterLeaderboard* s3eIOSGameCenterCreateLeaderboard(const char** playerIDs, int numPlayers)
@@ -449,7 +739,17 @@ s3eIOSGameCenterLeaderboard* s3eIOSGameCenterCreateLeaderboard(const char** play
     if (!_extLoad())
         return NULL;
 
-    return g_Ext.m_s3eIOSGameCenterCreateLeaderboard(playerIDs, numPlayers);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eIOSGameCenterLeaderboard* ret = g_Ext.m_s3eIOSGameCenterCreateLeaderboard(playerIDs, numPlayers);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 int32 s3eIOSGameCenterLeaderboardGetInt(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property)
@@ -459,7 +759,17 @@ int32 s3eIOSGameCenterLeaderboardGetInt(s3eIOSGameCenterLeaderboard* leaderboard
     if (!_extLoad())
         return -1;
 
-    return g_Ext.m_s3eIOSGameCenterLeaderboardGetInt(leaderboard, property);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    int32 ret = g_Ext.m_s3eIOSGameCenterLeaderboardGetInt(leaderboard, property);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLeaderboardSetInt(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property, int32 value)
@@ -469,7 +779,17 @@ s3eResult s3eIOSGameCenterLeaderboardSetInt(s3eIOSGameCenterLeaderboard* leaderb
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLeaderboardSetInt(leaderboard, property, value);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLeaderboardSetInt(leaderboard, property, value);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 const char* s3eIOSGameCenterLeaderboardGetString(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property)
@@ -479,7 +799,17 @@ const char* s3eIOSGameCenterLeaderboardGetString(s3eIOSGameCenterLeaderboard* le
     if (!_extLoad())
         return "";
 
-    return g_Ext.m_s3eIOSGameCenterLeaderboardGetString(leaderboard, property);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    const char* ret = g_Ext.m_s3eIOSGameCenterLeaderboardGetString(leaderboard, property);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLeaderboardSetString(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property, const char* value)
@@ -489,7 +819,17 @@ s3eResult s3eIOSGameCenterLeaderboardSetString(s3eIOSGameCenterLeaderboard* lead
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLeaderboardSetString(leaderboard, property, value);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLeaderboardSetString(leaderboard, property, value);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLeaderboardLoadScores(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLoadScoresCallbackFn loadScoresCB)
@@ -499,7 +839,17 @@ s3eResult s3eIOSGameCenterLeaderboardLoadScores(s3eIOSGameCenterLeaderboard* lea
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLeaderboardLoadScores(leaderboard, loadScoresCB);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLeaderboardLoadScores(leaderboard, loadScoresCB);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLeaderboardRelease(s3eIOSGameCenterLeaderboard* leaderboard)
@@ -509,7 +859,17 @@ s3eResult s3eIOSGameCenterLeaderboardRelease(s3eIOSGameCenterLeaderboard* leader
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLeaderboardRelease(leaderboard);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLeaderboardRelease(leaderboard);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterReportScore(int64 score, const char* category, s3eIOSGameCenterOperationCompleteCallbackFn callback)
@@ -519,7 +879,17 @@ s3eResult s3eIOSGameCenterReportScore(int64 score, const char* category, s3eIOSG
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterReportScore(score, category, callback);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterReportScore(score, category, callback);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterAchievementsShowGUI()
@@ -529,7 +899,17 @@ s3eResult s3eIOSGameCenterAchievementsShowGUI()
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterAchievementsShowGUI();
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterAchievementsShowGUI();
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLoadAchievementInfo(s3eIOSGameCenterLoadAchievementInfoCallbackFn callback)
@@ -539,7 +919,17 @@ s3eResult s3eIOSGameCenterLoadAchievementInfo(s3eIOSGameCenterLoadAchievementInf
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLoadAchievementInfo(callback);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLoadAchievementInfo(callback);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterLoadAchievements(s3eIOSGameCenterLoadAchievementsCallbackFn callback)
@@ -549,7 +939,17 @@ s3eResult s3eIOSGameCenterLoadAchievements(s3eIOSGameCenterLoadAchievementsCallb
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterLoadAchievements(callback);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterLoadAchievements(callback);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterAchievementsReset()
@@ -559,7 +959,17 @@ s3eResult s3eIOSGameCenterAchievementsReset()
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterAchievementsReset();
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterAchievementsReset();
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterReportAchievement(const char* name, int percentComplete, s3eIOSGameCenterOperationCompleteCallbackFn callback)
@@ -569,7 +979,17 @@ s3eResult s3eIOSGameCenterReportAchievement(const char* name, int percentComplet
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterReportAchievement(name, percentComplete, callback);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterReportAchievement(name, percentComplete, callback);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eBool s3eGameCentreVoiceChatIsAllowed()
@@ -579,7 +999,17 @@ s3eBool s3eGameCentreVoiceChatIsAllowed()
     if (!_extLoad())
         return S3E_FALSE;
 
-    return g_Ext.m_s3eGameCentreVoiceChatIsAllowed();
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eBool ret = g_Ext.m_s3eGameCentreVoiceChatIsAllowed();
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterSetVoiceChatUpdateHandler(s3eIOSGameCenterVoiceChatUpdateCallbackFn voiceChatUpdateCB)
@@ -589,7 +1019,17 @@ s3eResult s3eIOSGameCenterSetVoiceChatUpdateHandler(s3eIOSGameCenterVoiceChatUpd
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterSetVoiceChatUpdateHandler(voiceChatUpdateCB);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterSetVoiceChatUpdateHandler(voiceChatUpdateCB);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eIOSGameCenterVoiceChat* s3eIOSGameCenterVoiceChatOpenChannel(const char* channelName)
@@ -599,7 +1039,17 @@ s3eIOSGameCenterVoiceChat* s3eIOSGameCenterVoiceChatOpenChannel(const char* chan
     if (!_extLoad())
         return NULL;
 
-    return g_Ext.m_s3eIOSGameCenterVoiceChatOpenChannel(channelName);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eIOSGameCenterVoiceChat* ret = g_Ext.m_s3eIOSGameCenterVoiceChatOpenChannel(channelName);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterVoiceChatCloseChannel(s3eIOSGameCenterVoiceChat* channel)
@@ -609,7 +1059,17 @@ s3eResult s3eIOSGameCenterVoiceChatCloseChannel(s3eIOSGameCenterVoiceChat* chann
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterVoiceChatCloseChannel(channel);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterVoiceChatCloseChannel(channel);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 int32 s3eIOSGameCenterVoiceChatGetInt(s3eIOSGameCenterVoiceChat* channel, s3eIOSGameCenterVoiceChatProperty property)
@@ -619,7 +1079,17 @@ int32 s3eIOSGameCenterVoiceChatGetInt(s3eIOSGameCenterVoiceChat* channel, s3eIOS
     if (!_extLoad())
         return -1;
 
-    return g_Ext.m_s3eIOSGameCenterVoiceChatGetInt(channel, property);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    int32 ret = g_Ext.m_s3eIOSGameCenterVoiceChatGetInt(channel, property);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterVoiceChatSetInt(s3eIOSGameCenterVoiceChat* channel, s3eIOSGameCenterVoiceChatProperty property, int32 value)
@@ -629,7 +1099,17 @@ s3eResult s3eIOSGameCenterVoiceChatSetInt(s3eIOSGameCenterVoiceChat* channel, s3
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterVoiceChatSetInt(channel, property, value);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterVoiceChatSetInt(channel, property, value);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }
 
 s3eResult s3eIOSGameCenterVoiceChatSetMute(s3eIOSGameCenterVoiceChat* channel, const char* playerID, s3eBool mute)
@@ -639,5 +1119,15 @@ s3eResult s3eIOSGameCenterVoiceChatSetMute(s3eIOSGameCenterVoiceChat* channel, c
     if (!_extLoad())
         return S3E_RESULT_ERROR;
 
-    return g_Ext.m_s3eIOSGameCenterVoiceChatSetMute(channel, playerID, mute);
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallStart(S3E_TRUE, NULL);
+#endif
+
+    s3eResult ret = g_Ext.m_s3eIOSGameCenterVoiceChatSetMute(channel, playerID, mute);
+
+#ifdef LOADER_CALL
+    s3eDeviceLoaderCallDone(S3E_TRUE, NULL);
+#endif
+
+    return ret;
 }

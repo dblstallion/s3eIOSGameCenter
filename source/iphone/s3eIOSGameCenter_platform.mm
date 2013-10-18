@@ -971,7 +971,7 @@ static void (^s3eLoadScoresCompletionHandler)(NSArray*, NSError*) = ^(NSArray *s
 // ----------------------------------------------------------------------
 // s3e C++ functions
 
-s3eResult s3eIOSGameCenterInit()
+s3eResult s3eIOSGameCenterInit_platform()
 {
     g_Authentication = 0;
         
@@ -993,7 +993,7 @@ s3eResult s3eIOSGameCenterInit()
     return S3E_RESULT_ERROR;
 }
 
-void s3eIOSGameCenterTerminate()
+void s3eIOSGameCenterTerminate_platform()
 {
     if (g_Authentication)
         [g_Authentication release];
@@ -1052,7 +1052,7 @@ static bool s3eLocalPlayerIsAuthenticated(bool raiseError=true)
 // This may present login UI to the user if necessary to login or create an account. 
 // The user must be autheticated in order to use other APIs. 
 // This should be called for each launch of the application as soon as the UI is ready.
-s3eResult s3eIOSGameCenterAuthenticate(s3eIOSGameCenterAuthenticationCallbackFn authenticationCB, void* userData, s3eBool reuse)
+s3eResult s3eIOSGameCenterAuthenticate_platform(s3eIOSGameCenterAuthenticationCallbackFn authenticationCB, void* userData, s3eBool reuse)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterAuthenticate"));
 
@@ -1087,7 +1087,7 @@ s3eResult s3eIOSGameCenterAuthenticate(s3eIOSGameCenterAuthenticationCallbackFn 
     return S3E_RESULT_SUCCESS;
 }
 
-s3eResult s3eIOSGameCenterLoadFriends(s3eIOSGameCenterLoadFriendsCallbackFn loadFriendsCB, void* userData)
+s3eResult s3eIOSGameCenterLoadFriends_platform(s3eIOSGameCenterLoadFriendsCallbackFn loadFriendsCB, void* userData)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterLoadFriends"));
     CHECK_AUTH(S3E_RESULT_ERROR);
@@ -1097,7 +1097,7 @@ s3eResult s3eIOSGameCenterLoadFriends(s3eIOSGameCenterLoadFriendsCallbackFn load
     return S3E_RESULT_SUCCESS;
 }
 
-int32 s3eIOSGameCenterGetFriendIDs(char** friendIDs, int maxFriendIDs)
+int32 s3eIOSGameCenterGetFriendIDs_platform(char** friendIDs, int maxFriendIDs)
 {
     // May want to allow it to cache firends after local player sign-out in
     // which case, remove this
@@ -1128,7 +1128,7 @@ int32 s3eIOSGameCenterGetFriendIDs(char** friendIDs, int maxFriendIDs)
     return size;
 }
 
-int32 s3eIOSGameCenterGetInt(s3eIOSGameCenterProperty property)
+int32 s3eIOSGameCenterGetInt_platform(s3eIOSGameCenterProperty property)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterGetInt"));
 
@@ -1160,7 +1160,7 @@ int32 s3eIOSGameCenterGetInt(s3eIOSGameCenterProperty property)
     return -1;
 }
 
-const char* s3eIOSGameCenterGetString(s3eIOSGameCenterProperty property)
+const char* s3eIOSGameCenterGetString_platform(s3eIOSGameCenterProperty property)
 {
     if (!s3eLocalPlayerIsAuthenticated())
         return "";
@@ -1183,7 +1183,7 @@ const char* s3eIOSGameCenterGetString(s3eIOSGameCenterProperty property)
     return "";
 }
 
-s3eResult s3eIOSGameCenterGetPlayers(const char** playerIDs, int numPlayers, s3eIOSGameCenterGetPlayersCallbackFn receivePlayersCB)
+s3eResult s3eIOSGameCenterGetPlayers_platform(const char** playerIDs, int numPlayers, s3eIOSGameCenterGetPlayersCallbackFn receivePlayersCB)
 {
     GAMECENTER_CALLBACK_CHECK(receivePlayersCB, RECEIVE_PLAYERS)
 
@@ -1209,7 +1209,7 @@ s3eResult s3eIOSGameCenterGetPlayers(const char** playerIDs, int numPlayers, s3e
 
 // Query for activity level of either whole application or a group of players using application if playerGroup = 0
 // Only one request ongoing at a time. To cancel existing request, pass queryActivityCB=NULL.
-s3eResult s3eIOSGameCenterQueryPlayersActivity(s3eIOSGameCenterActivityCallbackFn queryActivityCB, int playerGroup, void* userData)
+s3eResult s3eIOSGameCenterQueryPlayersActivity_platform(s3eIOSGameCenterActivityCallbackFn queryActivityCB, int playerGroup, void* userData)
 {
     if (s3eEdkCallbacksIsRegistered(S3E_EXT_IOSGAMECENTER_HASH, S3E_IOSGAMECENTER_CALLBACK_QUERY_ACTIVITY))
     {
@@ -1272,7 +1272,7 @@ GKMatchRequest* makeMatchRequest(s3eIOSGameCenterMatchRequest* request)
 // Register a function to recieve invites from matches created by other users.
 // This should be called as early as possible in an application using game center (otherwise invites may be ignored).
 // Passing NULL for inviteListenerCB stops the application processing invitations.
-s3eResult s3eIOSGameCenterSetInviteHandler(s3eIOSGameCenterInviteCallbackFn callback)
+s3eResult s3eIOSGameCenterSetInviteHandler_platform(s3eIOSGameCenterInviteCallbackFn callback)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterSetInviteHandler"));
     GAMECENTER_CALLBACK_CHECK(callback, INVITE)
@@ -1293,7 +1293,7 @@ void s3eIOSGameCenterInviteAcceptGUI_real(GKInvite* invite)
     [g_DummyController presentModalViewController:controller animated:YES];
 }
 
-s3eBool s3eIOSGameCenterInviteAcceptGUI(void* inviteID, s3eIOSGameCenterMatchCallbacks* callbacks)
+s3eBool s3eIOSGameCenterInviteAcceptGUI_platform(void* inviteID, s3eIOSGameCenterMatchCallbacks* callbacks)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterInviteAcceptGUI: %p", inviteID));
 
@@ -1332,7 +1332,7 @@ s3eBool s3eIOSGameCenterInviteAcceptGUI(void* inviteID, s3eIOSGameCenterMatchCal
 
 // Invites need releasing due to being passed around callbacks. Can't assume s3eIOSGameCenterInviteAcceptGUI will
 // get called, e.g. if the user cancels multiplayer while invite is incoming, so we should have an explicit release.
-s3eResult s3eIOSGameCenterReleaseInvite(void* inviteID)
+s3eResult s3eIOSGameCenterReleaseInvite_platform(void* inviteID)
 {
     if (!inviteID)
     {
@@ -1986,12 +1986,14 @@ s3eResult s3eIOSGameCenterLeaderboardSetInt(s3eIOSGameCenterLeaderboard* leaderb
         case S3E_IOSGAMECENTER_LEADERBOARD_RANGE_START:
         {
             // Note these have limits of 1 to 100 but this might change so we'll let the iphone api handle it and error
-            objCBoard.range.location = value;
+            NSRange newRange = {.location = value, .length = objCBoard.range.length};
+            objCBoard.range = newRange;
             return S3E_RESULT_SUCCESS;
         }   
         case S3E_IOSGAMECENTER_LEADERBOARD_RANGE_SIZE:
         {
-            objCBoard.range.length = value;
+            NSRange newRange = {.location = objCBoard.range.location, .length = value};
+            objCBoard.range = newRange;
             return S3E_RESULT_SUCCESS;
         }
         case S3E_IOSGAMECENTER_LEADERBOARD_TIME_SCOPE:
@@ -2312,6 +2314,7 @@ s3eResult s3eIOSGameCenterReportAchievement(const char* name, int percentComplet
     GAMECENTER_CALLBACK_CHECK(callback, REPORT_ACHIEVEMENT);
     GKAchievement* achievement = [[GKAchievement alloc] initWithIdentifier: [NSString stringWithUTF8String:name]];
     achievement.percentComplete = percentComplete;
+    achievement.showsCompletionBanner = YES;
     EDK_CALLBACK_REG(IOSGAMECENTER, REPORT_ACHIEVEMENT, (s3eCallback)callback, NULL, true);
     [achievement reportAchievementWithCompletionHandler: reportAchievementCompleteHandler];
     return S3E_RESULT_SUCCESS;

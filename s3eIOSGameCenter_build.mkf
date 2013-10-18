@@ -1,11 +1,9 @@
-#mkf file for building extension s3eIOSGameCenter.
-#NOTE: This file was origianlly written by the extension builder, but will not
-#be overwritten (unless --force is specified) and is intended to be modified.
-
+# mkf file for building extension s3eIOSGameCenter.
+# NOTE: This file was originally written by the extension builder, but will not
+# be overwritten (unless --force is specified) and is intended to be modified.
 display_name "Extensions/s3eIOSGameCenter"
 
 includepath source/h
-
 includepath h
 
 defines
@@ -21,24 +19,76 @@ defines
 #the mkb is run
 extension
 {
-    ("$MARMALADE_ROOT/extensions/builder")
-    "make_extension s3eIOSGameCenter.s4e"
+    ("$MARMALADE_ROOT/s3e/edk/builder")
+    "edk_build s3eIOSGameCenter.s4e"
 }
 
 #include the extension builder subproject
-subproject s3e/edk
+subproject "$MARMALADE_ROOT/s3e/edk"
 
-file s3eIOSGameCenter.s4e
+if {{defined I3D_OS_IPHONE}}
+{
+    files
+    {
+        ["source"]
+        (use_first_found, source/iphone, source/generic)
+        s3eIOSGameCenter_platform.mm
+        #Add any iphone-specific files here
+    }
+}
 
-#This extension is intended to only be built for iOS
+if {{defined I3D_OS_WINDOWS}}
+{
+    files
+    {
+        ["source"]
+        (use_first_found, source/windows, source/generic)
+        s3eIOSGameCenter_platform.cpp
+        #Add any windows-specific files here
+    }
+}
+
+if {{defined S3E_ANDROID}}
+{
+    files
+    {
+        ["source"]
+        (use_first_found, source/android, source/generic)
+        s3eIOSGameCenter_platform.cpp
+        #Add any android-specific files here
+    }
+}
+
+if {{defined I3D_OS_OSX}}
+{
+    files
+    {
+        ["source"]
+        (use_first_found, source/osx, source/generic)
+        s3eIOSGameCenter_platform.mm
+        #Add any osx-specific files here
+    }
+}
+
+if {{defined I3D_OS_LINUX and not defined S3E_ANDROID}}
+{
+    files
+    {
+        ["source"]
+        (use_first_found, source/linux, source/generic)
+        s3eIOSGameCenter_platform.cpp
+        #Add any linux-specific files here
+    }
+}
+
 files
 {
-    ["source"]
-    (source/generic)
-    s3eIOSGameCenter_register.cpp
 
-    (source/iphone)    
-    s3eIOSGameCenter.mm
+    # Add any platform-independent files here
+    # Note that if the file exists in the platform-specific directory
+    # it will be taken from there instead of 'generic'
+    s3eIOSGameCenter_register.cpp
+    s3eIOSGameCenter.cpp
 
     ["h"]
     (source/h)
@@ -48,4 +98,8 @@ files
     ["docs"]
     (interface)
     s3eIOSGameCenter.defines.txt
+
+    []
+    (.)
+    s3eIOSGameCenter.s4e
 }
