@@ -1365,7 +1365,7 @@ bool requestedPlayerAmountIsValid(s3eIOSGameCenterMatchRequest* request)
 }
 
 // Find players for a match to be hosted externally from Game Center (matchmaking only, gamecenter does not manage the match).
-s3eResult s3eIOSGameCenterMatchmakerFindPlayersForHostedRequest(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterFindPlayersCallbackFn findPlayersCB, void* userData)
+s3eResult s3eIOSGameCenterMatchmakerFindPlayersForHostedRequest_platform(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterFindPlayersCallbackFn findPlayersCB, void* userData)
 {
     CHECK_AUTH(S3E_RESULT_ERROR);
 
@@ -1399,7 +1399,7 @@ s3eResult s3eIOSGameCenterMatchmakerFindPlayersForHostedRequest(s3eIOSGameCenter
 
 // Create a match based on a request. Match pointer will be passed to createMatchCB callback on
 // success and the other callbacks will be registered. On failure,
-s3eResult s3eIOSGameCenterMatchmakerCreateMatch(s3eIOSGameCenterMatchRequest* request,
+s3eResult s3eIOSGameCenterMatchmakerCreateMatch_platform(s3eIOSGameCenterMatchRequest* request,
                                              s3eIOSGameCenterCreateMatchCallbackFn createMatchCB,
                                              s3eIOSGameCenterMatchCallbacks* callbacks)
 {
@@ -1504,7 +1504,7 @@ s3eResult s3eIOSGameCenterMatchmakerGUI_Generic(s3eIOSGameCenterMatchRequest* re
     return g_GUIResult;
 }
 
-s3eResult s3eIOSGameCenterMatchmakerGUI(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterMatchCallbacks* callbacks)
+s3eResult s3eIOSGameCenterMatchmakerGUI_platform(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterMatchCallbacks* callbacks)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterMatchmakerGUI"));
 
@@ -1520,7 +1520,7 @@ s3eResult s3eIOSGameCenterMatchmakerGUI(s3eIOSGameCenterMatchRequest* request, s
     return s3eIOSGameCenterMatchmakerGUI_Generic(request, callbacks, NULL);
 }
 
-s3eResult s3eIOSGameCenterMatchmakerHostedGUI(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterFindPlayersCallbackFn findPlayersCB)
+s3eResult s3eIOSGameCenterMatchmakerHostedGUI_platform(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterFindPlayersCallbackFn findPlayersCB)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterMatchmakerHostedGUI"));
 
@@ -1536,7 +1536,7 @@ s3eResult s3eIOSGameCenterMatchmakerHostedGUI(s3eIOSGameCenterMatchRequest* requ
     return s3eIOSGameCenterMatchmakerGUI_Generic(request, NULL, findPlayersCB);
 }
 
-s3eResult s3eIOSGameCenterMatchmakerAddPlayersToMatch(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterAddPlayersToMatchCallbackFn addPlayersCB, void* userData)
+s3eResult s3eIOSGameCenterMatchmakerAddPlayersToMatch_platform(s3eIOSGameCenterMatchRequest* request, s3eIOSGameCenterAddPlayersToMatchCallbackFn addPlayersCB, void* userData)
 {
     CHECK_MATCH(S3E_RESULT_ERROR);
 
@@ -1552,7 +1552,7 @@ s3eResult s3eIOSGameCenterMatchmakerAddPlayersToMatch(s3eIOSGameCenterMatchReque
 }
 
 // Cancel all matchmaking requests
-void s3eIOSGameCenterCancelMatchmaking()
+void s3eIOSGameCenterCancelMatchmaking_platform()
 {
     // Unregister all callbacks for matchfinding at this point. Do this first to avoid callbacks being called with "cancelled" errors
     if (s3eEdkCallbacksIsRegistered(S3E_EXT_IOSGAMECENTER_HASH, S3E_IOSGAMECENTER_CALLBACK_FIND_PLAYERS))
@@ -1574,7 +1574,7 @@ void s3eIOSGameCenterCancelMatchmaking()
 // an easier to use but more powerful replacement for GKSession...
 
 // Disconnect match
-s3eResult s3eIOSGameCenterMatchDisconnect()
+s3eResult s3eIOSGameCenterMatchDisconnect_platform()
 {
     // Note wec urrently just have the one global match and assume that was passed to the user originally.
     // Could expand this though doubtful anyone would want multiple matches. Not clear apples API supports it anyway.
@@ -1600,7 +1600,7 @@ s3eResult s3eIOSGameCenterMatchDisconnect()
     return S3E_RESULT_SUCCESS;
 }
 
-int32 s3eIOSGameCenterMatchGetInt(s3eIOSGameCenterMatchProperty property)
+int32 s3eIOSGameCenterMatchGetInt_platform(s3eIOSGameCenterMatchProperty property)
 {
     CHECK_MATCH(-1);
 
@@ -1618,7 +1618,7 @@ int32 s3eIOSGameCenterMatchGetInt(s3eIOSGameCenterMatchProperty property)
 }
 
 // Requests a list of players connected to the match, to be passed asynchronously to callback registered on start match
-int32 s3eIOSGameCenterGetPlayerIDsInMatch(char** playerIDs, int maxPlayerIDs)
+int32 s3eIOSGameCenterGetPlayerIDsInMatch_platform(char** playerIDs, int maxPlayerIDs)
 {
     CHECK_MATCH(-1);
     NSArray* playerIDArray = g_Match.playerIDs;
@@ -1640,7 +1640,7 @@ int32 s3eIOSGameCenterGetPlayerIDsInMatch(char** playerIDs, int maxPlayerIDs)
     return size;
 }
 
-void s3eIOSGameCenterReleasePlayers(struct s3eIOSGameCenterPlayer** players, int numPlayers)
+void s3eIOSGameCenterReleasePlayers_platform(struct s3eIOSGameCenterPlayer** players, int numPlayers)
 {
     if (!numPlayers || !players)
         return;
@@ -1660,7 +1660,7 @@ void s3eIOSGameCenterReleasePlayers(struct s3eIOSGameCenterPlayer** players, int
 }
 
 // Retrieves a string property for a player.
-const char* s3eIOSGameCenterPlayerGetString(struct s3eIOSGameCenterPlayer* player, s3eIOSGameCenterPlayerProperty property)
+const char* s3eIOSGameCenterPlayerGetString_platform(struct s3eIOSGameCenterPlayer* player, s3eIOSGameCenterPlayerProperty property)
 {
     if (!player)
     {
@@ -1696,7 +1696,7 @@ const char* s3eIOSGameCenterPlayerGetString(struct s3eIOSGameCenterPlayer* playe
 }
 
 // Retrieves an int property for a player.
-int32 s3eIOSGameCenterPlayerGetInt(struct s3eIOSGameCenterPlayer* player, s3eIOSGameCenterPlayerProperty property)
+int32 s3eIOSGameCenterPlayerGetInt_platform(struct s3eIOSGameCenterPlayer* player, s3eIOSGameCenterPlayerProperty property)
 {
     if (!player)
     {
@@ -1723,7 +1723,7 @@ int32 s3eIOSGameCenterPlayerGetInt(struct s3eIOSGameCenterPlayer* player, s3eIOS
 }
 
 
-s3eResult s3eIOSGameCenterSendDataToPlayers(char** playerIDs, int numPlayers, const void* data, int dataLen, s3eIOSGameCenterMatchSendDataMode mode)
+s3eResult s3eIOSGameCenterSendDataToPlayers_platform(char** playerIDs, int numPlayers, const void* data, int dataLen, s3eIOSGameCenterMatchSendDataMode mode)
 {
     CHECK_MATCH(S3E_RESULT_ERROR);
 
@@ -1767,7 +1767,7 @@ s3eResult s3eIOSGameCenterSendDataToPlayers(char** playerIDs, int numPlayers, co
     return S3E_RESULT_ERROR;
 }
 
-s3eResult s3eIOSGameCenterSendDataToAllPlayers(const void* data, int dataLen, s3eIOSGameCenterMatchSendDataMode mode)
+s3eResult s3eIOSGameCenterSendDataToAllPlayers_platform(const void* data, int dataLen, s3eIOSGameCenterMatchSendDataMode mode)
 {
     CHECK_MATCH(S3E_RESULT_ERROR);
 
@@ -1797,7 +1797,7 @@ s3eResult s3eIOSGameCenterSendDataToAllPlayers(const void* data, int dataLen, s3
 // ---------- Leaderboard  ----------
 
 // Asynchronously load a list of categories (different leaderboards) available for the app.
-s3eResult s3eIOSGameCenterLeaderboardLoadCategories(s3eIOSGameCenterLeaderboardLoadCategoriesCallbackFn loadCategoriesCB)
+s3eResult s3eIOSGameCenterLeaderboardLoadCategories_platform(s3eIOSGameCenterLeaderboardLoadCategoriesCallbackFn loadCategoriesCB)
 {
     // TODO: check if you need to log in before using leaderboards.
     GAMECENTER_CALLBACK_CHECK(loadCategoriesCB, LEADERBOARD_LOAD_CATEGORIES)
@@ -1837,7 +1837,7 @@ void s3eIOSGameCenterLeaderboardShowGUI_real(const char* category, s3eIOSGameCen
 }
 
 // Display default GUI (only category and time limits supported natively)
-s3eResult s3eIOSGameCenterLeaderboardShowGUI(const char* category, s3eIOSGameCenterTimeScope timeScope)
+s3eResult s3eIOSGameCenterLeaderboardShowGUI_platform(const char* category, s3eIOSGameCenterTimeScope timeScope)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterLeaderboardShowGUI: %s %d", category, (int)timeScope));
 
@@ -1867,7 +1867,7 @@ s3eResult s3eIOSGameCenterLeaderboardShowGUI(const char* category, s3eIOSGameCen
 }
 
 // Create a leaderboard to then use to request score information
-s3eIOSGameCenterLeaderboard* s3eIOSGameCenterCreateLeaderboard(const char** playerIDs, int numPlayers)
+s3eIOSGameCenterLeaderboard* s3eIOSGameCenterCreateLeaderboard_platform(const char** playerIDs, int numPlayers)
 {
     GKLeaderboard* objCBoard = NULL;
 
@@ -1900,7 +1900,7 @@ s3eIOSGameCenterLeaderboard* s3eIOSGameCenterCreateLeaderboard(const char** play
 }
 
 // Get a leaderboard value
-int32 s3eIOSGameCenterLeaderboardGetInt(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property)
+int32 s3eIOSGameCenterLeaderboardGetInt_platform(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property)
 {
     if (!leaderboard)
     {
@@ -1956,7 +1956,7 @@ int32 s3eIOSGameCenterLeaderboardGetInt(s3eIOSGameCenterLeaderboard* leaderboard
 }
 
 // Set a leaderboard value to specify which scores to retrieve
-s3eResult s3eIOSGameCenterLeaderboardSetInt(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property, int32 value)
+s3eResult s3eIOSGameCenterLeaderboardSetInt_platform(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property, int32 value)
 {
     if (!leaderboard)
     {
@@ -2024,7 +2024,7 @@ s3eResult s3eIOSGameCenterLeaderboardSetInt(s3eIOSGameCenterLeaderboard* leaderb
     return S3E_RESULT_ERROR;
 }
 
-const char* s3eIOSGameCenterLeaderboardGetString(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property)
+const char* s3eIOSGameCenterLeaderboardGetString_platform(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property)
 {
     if (!leaderboard)
     {
@@ -2052,7 +2052,7 @@ const char* s3eIOSGameCenterLeaderboardGetString(s3eIOSGameCenterLeaderboard* le
     return "";
 }
 
-s3eResult s3eIOSGameCenterLeaderboardSetString(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property, const char* value)
+s3eResult s3eIOSGameCenterLeaderboardSetString_platform(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLeaderboardProperty property, const char* value)
 {
     if (!leaderboard || (!value && property != S3E_IOSGAMECENTER_LEADERBOARD_CATEGORY))
     {
@@ -2082,7 +2082,7 @@ s3eResult s3eIOSGameCenterLeaderboardSetString(s3eIOSGameCenterLeaderboard* lead
 }
 
 // Asynchronously Request scores that match the requirements of a given leaderboard.
-s3eResult s3eIOSGameCenterLeaderboardLoadScores(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLoadScoresCallbackFn loadScoresCB)
+s3eResult s3eIOSGameCenterLeaderboardLoadScores_platform(s3eIOSGameCenterLeaderboard* leaderboard, s3eIOSGameCenterLoadScoresCallbackFn loadScoresCB)
 {
     if (!s3eLocalPlayerIsAuthenticated())
         return S3E_RESULT_ERROR;
@@ -2104,7 +2104,7 @@ s3eResult s3eIOSGameCenterLeaderboardLoadScores(s3eIOSGameCenterLeaderboard* lea
 }
 
 // Release a leaderboard. Should be called for every board created with s3eIOSGameCenterCreateLeaderboard when finished with.
-s3eResult s3eIOSGameCenterLeaderboardRelease(s3eIOSGameCenterLeaderboard* leaderboard)
+s3eResult s3eIOSGameCenterLeaderboardRelease_platform(s3eIOSGameCenterLeaderboard* leaderboard)
 {
     if (!leaderboard)
     {
@@ -2121,7 +2121,7 @@ s3eResult s3eIOSGameCenterLeaderboardRelease(s3eIOSGameCenterLeaderboard* leader
  * Report/submit a score to the Game Center servers. scoreReport indicates
  * whether the asynchronous submission is successful.
  */
-s3eResult s3eIOSGameCenterReportScore(int64 score, const char* category, s3eIOSGameCenterOperationCompleteCallbackFn scoreReportCB)
+s3eResult s3eIOSGameCenterReportScore_platform(int64 score, const char* category, s3eIOSGameCenterOperationCompleteCallbackFn scoreReportCB)
 {
     GAMECENTER_CALLBACK_CHECK(scoreReportCB, REPORT_SCORE);
     CHECK_AUTH(S3E_RESULT_ERROR);
@@ -2158,7 +2158,7 @@ void s3eIOSGameCenterAchievementsShowGUI_real()
 }
 
 // Display default GUI (only category and time limits supported natively)
-s3eResult s3eIOSGameCenterAchievementsShowGUI()
+s3eResult s3eIOSGameCenterAchievementsShowGUI_platform()
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterAchievementsShowGUI"));
 
@@ -2219,7 +2219,7 @@ void(^loadAchievementInfoHandler)(NSArray*, NSError*) = ^(NSArray *achievements,
                            NULL);
 };
 
-s3eResult s3eIOSGameCenterLoadAchievementInfo(s3eIOSGameCenterLoadAchievementInfoCallbackFn callback)
+s3eResult s3eIOSGameCenterLoadAchievementInfo_platform(s3eIOSGameCenterLoadAchievementInfoCallbackFn callback)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterLoadAchievementInfo"));
     GAMECENTER_CALLBACK_CHECK(callback, LOAD_ACHIEVEMENT_INFO);
@@ -2268,7 +2268,7 @@ void(^resetAchievementsHandler)(NSError*) = ^(NSError *error)
     IwTrace(GAMECENTER, ("resetAchievementsHandler"));
 };
 
-s3eResult s3eIOSGameCenterLoadAchievements(s3eIOSGameCenterLoadAchievementsCallbackFn callback)
+s3eResult s3eIOSGameCenterLoadAchievements_platform(s3eIOSGameCenterLoadAchievementsCallbackFn callback)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterLoadAchievements"));
     CHECK_AUTH(S3E_RESULT_ERROR);
@@ -2278,7 +2278,7 @@ s3eResult s3eIOSGameCenterLoadAchievements(s3eIOSGameCenterLoadAchievementsCallb
     return S3E_RESULT_SUCCESS;
 }
 
-s3eResult s3eIOSGameCenterAchievementsReset()
+s3eResult s3eIOSGameCenterAchievementsReset_platform()
 {
     CHECK_AUTH(S3E_RESULT_ERROR);
     [GKAchievement resetAchievementsWithCompletionHandler: resetAchievementsHandler];
@@ -2307,7 +2307,7 @@ void(^reportAchievementCompleteHandler)(NSError*) = ^(NSError *error)
                            NULL);
 };
 
-s3eResult s3eIOSGameCenterReportAchievement(const char* name, int percentComplete, s3eIOSGameCenterOperationCompleteCallbackFn callback)
+s3eResult s3eIOSGameCenterReportAchievement_platform(const char* name, int percentComplete, s3eIOSGameCenterOperationCompleteCallbackFn callback)
 {
     IwTrace(GAMECENTER, ("s3eIOSGameCenterReportAchievement: %s %d", name, percentComplete));
     CHECK_AUTH(S3E_RESULT_ERROR);
@@ -2323,13 +2323,13 @@ s3eResult s3eIOSGameCenterReportAchievement(const char* name, int percentComplet
 
 // ---------- Voice chat ----------
 
-s3eBool s3eGameCentreVoiceChatIsAllowed()
+s3eBool s3eGameCentreVoiceChatIsAllowed_platform()
 {
     BOOL isAllowed = [GKVoiceChat isVoIPAllowed];
     return isAllowed;
 }
 
-s3eResult s3eIOSGameCenterSetVoiceChatUpdateHandler(s3eIOSGameCenterVoiceChatUpdateCallbackFn voiceChatUpdateCB)
+s3eResult s3eIOSGameCenterSetVoiceChatUpdateHandler_platform(s3eIOSGameCenterVoiceChatUpdateCallbackFn voiceChatUpdateCB)
 {
     GAMECENTER_CALLBACK_CHECK(voiceChatUpdateCB, VOICE_CHAT_UPDATE)
     EDK_CALLBACK_REG(IOSGAMECENTER, VOICE_CHAT_UPDATE, (s3eCallback)voiceChatUpdateCB, NULL, true);
@@ -2355,7 +2355,7 @@ void(^playerStateUpdateHandler)(NSString*, GKVoiceChatPlayerState) = ^(NSString 
 // Join a voice chat channel by match and name. This will create a voice chat connection using
 // the current match parameters so that connected players in that match can also join it.
 // Will return nil if parental controls are turned on.
-s3eIOSGameCenterVoiceChat* s3eIOSGameCenterVoiceChatOpenChannel(const char* channelName)
+s3eIOSGameCenterVoiceChat* s3eIOSGameCenterVoiceChatOpenChannel_platform(const char* channelName)
 {
     CHECK_MATCH(NULL);
     if (!channelName || channelName[0] == '\0')
@@ -2398,7 +2398,7 @@ s3eIOSGameCenterVoiceChat* s3eIOSGameCenterVoiceChatOpenChannel(const char* chan
     return gcVoiceChat;
 }
 
-s3eResult s3eIOSGameCenterVoiceChatCloseChannel(s3eIOSGameCenterVoiceChat* channel)
+s3eResult s3eIOSGameCenterVoiceChatCloseChannel_platform(s3eIOSGameCenterVoiceChat* channel)
 {
     CHECK_MATCH(S3E_RESULT_ERROR);
 
@@ -2415,7 +2415,7 @@ s3eResult s3eIOSGameCenterVoiceChatCloseChannel(s3eIOSGameCenterVoiceChat* chann
     return S3E_RESULT_SUCCESS;
 }
 
-int32 s3eIOSGameCenterVoiceChatGetInt(s3eIOSGameCenterVoiceChat* channel, s3eIOSGameCenterVoiceChatProperty property)
+int32 s3eIOSGameCenterVoiceChatGetInt_platform(s3eIOSGameCenterVoiceChat* channel, s3eIOSGameCenterVoiceChatProperty property)
 {
     if (!channel)
     {
@@ -2442,7 +2442,7 @@ int32 s3eIOSGameCenterVoiceChatGetInt(s3eIOSGameCenterVoiceChat* channel, s3eIOS
     return -1;
 }
 
-s3eResult s3eIOSGameCenterVoiceChatSetInt(s3eIOSGameCenterVoiceChat* channel, s3eIOSGameCenterVoiceChatProperty property, int32 value)
+s3eResult s3eIOSGameCenterVoiceChatSetInt_platform(s3eIOSGameCenterVoiceChat* channel, s3eIOSGameCenterVoiceChatProperty property, int32 value)
 {
     if (!channel)
     {
@@ -2488,7 +2488,7 @@ s3eResult s3eIOSGameCenterVoiceChatSetInt(s3eIOSGameCenterVoiceChat* channel, s3
     return S3E_RESULT_ERROR;
 }
 
-s3eResult s3eIOSGameCenterVoiceChatSetMute(s3eIOSGameCenterVoiceChat* channel, const char* playerID, s3eBool mute)
+s3eResult s3eIOSGameCenterVoiceChatSetMute_platform(s3eIOSGameCenterVoiceChat* channel, const char* playerID, s3eBool mute)
 {
     if (!channel || !playerID)
     {
